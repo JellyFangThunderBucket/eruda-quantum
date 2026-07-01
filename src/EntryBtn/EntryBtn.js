@@ -17,6 +17,9 @@ export default class EntryBtn extends Emitter {
     this._style = evalCss(require('./EntryBtn.scss'))
 
     this._$container = $container
+    this._dragFrame = null
+    this._pendingPos = null
+
     this._initTpl()
     this._bindEvent()
     this._registerListener()
@@ -45,6 +48,8 @@ export default class EntryBtn extends Emitter {
   destroy() {
     evalCss.remove(this._style)
     this._unregisterListener()
+    this._unbindEvent()
+    this._cancelDragFrame()
     this._$el.remove()
   }
   _isOutOfRange(pos) {
@@ -120,10 +125,7 @@ export default class EntryBtn extends Emitter {
     } else if (newY > maxHeight - btnSize) {
       newY = maxHeight - btnSize
     }
-    this._$el.css({
-      left: newX,
-      top: newY,
-    })
+    this._scheduleDragPosition(newX, newY)
   }
   _onDragEnd = (e) => {
     const $el = this._$el
@@ -135,6 +137,7 @@ export default class EntryBtn extends Emitter {
     this._onDragMove(e)
     $document.off(pointerEvent('move'), this._onDragMove)
     $document.off(pointerEvent('up'), this._onDragEnd)
+    this._flushDragPosition()
 
     const cfg = this.config
 
@@ -152,8 +155,46 @@ export default class EntryBtn extends Emitter {
 
     $el.on(pointerEvent('down'), this._onDragStart)
 
-    orientation.on('change', () => this._resetPos(true))
-    window.addEventListener('resize', () => this._resetPos())
+    this._orientationListener = () => this._resetPos(true)
+    this._resizeListener = () => this._resetPos()
+
+    orientation.on('change', this._orientationListener)
+    window.addEventListener('resize', this._resizeListener)
+  }
+  _unbindEvent() {
+    this._$el.off(pointerEvent('down'), this._onDragStart)
+    $document.off(pointerEvent('move'), this._onDragMove)
+    $document.off(pointerEvent('up'), this._onDragEnd)
+
+    if (this._orientationListener) {
+      orientation.off('change', this._orientationListener)
+    }
+    if (this._resizeListener) {
+      window.removeEventListener('resize', this._resizeListener)
+    }
+  }
+  _scheduleDragPosition(left, top) {
+    this._pendingPos = { left, top }
+
+    if (this._dragFrame) return
+
+    this._dragFrame = requestAnimationFrame(() => {
+      this._dragFrame = null
+      this._flushDragPosition()
+    })
+  }
+  _flushDragPosition() {
+    if (!this._pendingPos) return
+
+    this._$el.css(this._pendingPos)
+    this._pendingPos = null
+  }
+  _cancelDragFrame() {
+    if (this._dragFrame) {
+      cancelAnimationFrame(this._dragFrame)
+      this._dragFrame = null
+    }
+    this._pendingPos = null
   }
   initCfg(settings) {
     const cfg = (this.config = Settings.createCfg('entry-button', {

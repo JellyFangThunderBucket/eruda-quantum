@@ -51,6 +51,7 @@ export default class DevTools extends Emitter {
     this._tools = {}
     this._isResizing = false
     this._resizeTimer = null
+    this._themeChangeListener = null
     this._resizeStartY = 0
     this._resizeStartSize = 0
     this._inline = inline
@@ -256,6 +257,10 @@ export default class DevTools extends Emitter {
     this._$el.remove()
     window.removeEventListener('resize', this._checkSafeArea)
     emitter.off(emitter.SCALE, this._updateTabHeight)
+    if (this._themeChangeListener) {
+      theme.off('change', this._themeChangeListener)
+      this._themeChangeListener = null
+    }
   }
   _checkSafeArea = () => {
     const { $container } = this
@@ -398,11 +403,12 @@ export default class DevTools extends Emitter {
 
     emitter.on(emitter.SCALE, this._updateTabHeight)
 
-    theme.on('change', () => {
+    this._themeChangeListener = () => {
       const t = this.config.get('theme')
       if (t === 'System preference') {
         this._setTheme(t)
       }
-    })
+    }
+    theme.on('change', this._themeChangeListener)
   }
 }
