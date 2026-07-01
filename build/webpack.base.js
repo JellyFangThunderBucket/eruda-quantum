@@ -13,14 +13,16 @@ const banner = pkg.name + ' v' + pkg.version + ' ' + pkg.homepage
 const postcssLoader = {
   loader: 'postcss-loader',
   options: {
-    plugins: [
-      prefixer({
-        prefix: '_',
-        ignore: [/luna-*/],
-      }),
-      autoprefixer,
-      clean(),
-    ],
+    postcssOptions: {
+      plugins: [
+        prefixer({
+          prefix: '_',
+          ignore: [/luna-*/],
+        }),
+        autoprefixer,
+        clean(),
+      ],
+    },
   },
 }
 
