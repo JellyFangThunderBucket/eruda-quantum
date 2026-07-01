@@ -9,16 +9,16 @@
   ],
   "scripts": {
     "ci": "npm run lint && npm run test && npm run build && npm run es5",
-    "build": "lsla shx rm -rf dist && webpack --config build/webpack.prod.js && webpack --config build/webpack.polyfill.js && node build/build && lsla shx cp README.md eruda.d.ts dist",
+    "build": "node scripts/clean-dist.js && webpack --config build/webpack.prod.js && webpack --config build/webpack.polyfill.js && node build/build && node scripts/copy-dist-assets.js",
     "build:analyser": "webpack --config build/webpack.analyser.js",
     "dev": "webpack-dev-server --config build/webpack.dev.js --host 0.0.0.0",
-    "test": "karma start",
-    "format": "lsla prettier \"*.{js,ts}\" \"src/**/*.{js,scss,css,json}\" \"build/*.js\" \"test/*.{js,html}\" --write",
+    "test": "node scripts/check-chrome-headless.js && karma start",
+    "format": "prettier \"*.{js,ts}\" \"src/**/*.{js,scss,css,json}\" \"build/*.js\" \"test/*.{js,html}\" --write",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
     "es5": "es-check es5 dist/eruda.js dist/eruda-polyfill.js",
-    "setup": "lsla shx mkdir -p test/lib && lsla shx cp node_modules/jasmine-core/lib/jasmine-core/{jasmine.css,jasmine.js,jasmine-html.js,boot.js} test/lib && lsla shx cp node_modules/jasmine-jquery/lib/jasmine-jquery.js test/lib && lsla shx cp node_modules/jquery/dist/jquery.js test/lib",
-    "genIcon": "lsla genIcon --input src/style/ --output src/style/icon.css --name eruda-icon --source src/style/icon/ && lsla prettier src/**/*.css --write"
+    "setup": "node scripts/setup-test-libs.js",
+    "genIcon": "lsla genIcon --input src/style/ --output src/style/icon.css --name eruda-icon --source src/style/icon/ && prettier src/**/*.css --write"
   },
   "repository": {
     "type": "git",
@@ -80,6 +80,7 @@
     "raw-loader": "^4.0.2",
     "sass": "^1.77.6",
     "sass-loader": "^14.2.1",
+    "terser-webpack-plugin": "^5.3.10",
     "webpack": "^5.92.1",
     "webpack-bundle-analyzer": "^4.7.0",
     "webpack-cli": "^5.1.4",

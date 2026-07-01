@@ -82,4 +82,41 @@ For more detailed usage instructions, please read the documentation at [eruda.li
 
 ## Contribution
 
-Read [Contributing Guide](https://eruda.liriliri.io/docs/contributing.html) for development setup instructions.
+Read [Contributing Guide](https://eruda.liriliri.io/docs/contributing.html) for full development setup instructions.
+
+### Local development
+
+Eruda's CI currently runs on Node.js 18.x. Use Node.js 18 or a newer active LTS release when working locally.
+
+Install dependencies with npm:
+
+```bash
+npm install
+```
+
+Run the linter:
+
+```bash
+npm run lint
+```
+
+Run the browser test suite:
+
+```bash
+npm test
+```
+
+Tests are executed by Karma with `karma-chrome-launcher` and the `ChromeHeadless` browser. Install Google Chrome or Chromium before running tests. If Chrome is installed in a non-standard location, set `CHROME_BIN` to the executable path first:
+
+```bash
+export CHROME_BIN=/path/to/chrome
+npm test
+```
+
+Build the distributable files:
+
+```bash
+npm run build
+```
+
+The build writes `dist/eruda.js`, `dist/eruda-polyfill.js`, type declarations, and README assets used for package publishing.
